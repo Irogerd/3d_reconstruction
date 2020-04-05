@@ -1,16 +1,14 @@
+%
+%   Plane integrals of the ball computation
+%   Input params:
+%       N           number of planes per the direction
+%       dt          discretisation step
+%       R           radius of the ball
+%   Output params:
+%       res         array of integral values with size N
+%
+
 function res = getAnalyticalIntegrals(N, dt, R)
-%     res = zeros(N, N_angles);
-%     dt = 2*L / N;
-%     
-%     for rho = 1:N
-%         for angle = 1:N_angles
-%             theta = deg2rad(angles(angle,1));
-%             phi = deg2rad(angles(angle, 2));
-%             
-%             dist = -L + (rho-1)*dt;
-%             res(rho, angle) = 4*(1 - dist*cos(phi)*sin(theta) - dist*sin(phi)*sin(theta) - dist*cos(theta));
-%         end
-%     end
     res = zeros(1,N);
     for i = 1:N
         d = -R + dt*(i-1);
