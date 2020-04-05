@@ -5,20 +5,35 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
 [The ASTRA Toolbox](https://www.astra-toolbox.com/)
 
 ## Functions
-### - getSphereData
+### - getBallData
   3D-array with zeros and ones generation. Ones are located in each point which satisfies (x - x_c)^2 + (y - y_c)^2 + (z - z_c)^2 <= R^2
   
   Input params:
   
     N - number of elements in each dimention
     
-    R - radius of sphere
-    
-    xyz_center - sphere center coordinate (x_c = y_c = z_c = xyz_cener)
+    R - radius of ball
   
   Output params:
   
     data - 3D array NxNxN with generated values
+    
+    dt - discretization step
+    
+### - getAnalyticalIntegrals
+  Plane integrals of the ball computation
+  
+  Input params:
+  
+    N - number of planes per the direction
+    
+    dt - discretisation step
+    
+    R - radius of ball
+  
+  Output params:
+  
+    res - array of integral values with size N
 ### - getVectorRepresentationOfAngle
   Calculation of angle vector representation which is required to ASTRA
   
@@ -39,6 +54,8 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     
     N - number of elements in each dimention
     
+    M - number of projectons per direction
+    
     angles - 2D array N_anglesx12 of normal vector angles
     
     N_angles - number of angles
@@ -52,7 +69,9 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
   
-    N - number of elements in each dimention
+    N - number of elements in each dimension
+    
+    M - number of projections per each direction
     
     angles - 2D array N_anglesx12 of normal vector angles
     
@@ -68,7 +87,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
     
-    N - number of elements in each dimention of the original data
+    N - number of elements in each dimension of the original data
     
     sino_id - ID of sinogram in ASTRA memory 
     
