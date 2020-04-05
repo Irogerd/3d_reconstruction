@@ -4,7 +4,6 @@
 %       data        3D array NxNxN of data with (x,y,z) order
 %       N           number of elements in each dimension
 %       M           number of projectons per direction
-%       N_proj      numer of projections
 %       angles      2D array N_anglesx12 of normal vector angles
 %       N_angles    number of angles
 %   Output params:
