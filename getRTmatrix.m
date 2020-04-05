@@ -1,7 +1,7 @@
 %
 %   3D Radon transform linear operator matrix calculation
 %   Input params:
-%       N               number of elements in each dimention
+%       N               number of elements in each dimension
 %       M               number of projections per each direction
 %       angles          2D array N_anglesx12 of normal vector angles
 %       N_angles        number of angles
