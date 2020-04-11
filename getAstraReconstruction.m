@@ -23,6 +23,6 @@ function data = getAstraReconstruction(sino_id, N, N_iter)
     data = astra_mex_data3d('get', rec_id);
     astra_mex_algorithm('delete', alg_id);
     astra_mex_data3d('delete', rec_id);
-    %astra_mex_data3d('delete', sino_id);
+    astra_mex_data3d('delete', sino_id);
     
 end
