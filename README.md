@@ -20,6 +20,20 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     
     dt - discretization step
     
+### - getComplexBallData
+  3D-array with the ball which has ellipsoid, parallelepiped and two balls inside. 
+  Input params:
+  
+    N - number of elements in each dimention
+    
+    R - radius of ball
+  
+  Output params:
+  
+    data - 3D array NxNxN with generated values
+    
+    dt - discretization step
+    
 ### - getAnalyticalIntegrals
   Plane integrals of the ball computation
   
@@ -34,8 +48,22 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   Output params:
   
     res - array of integral values with size N
+    
+### - getAngles
+  Calculates set of angles which define directions. This set is Cartesian product of number of theta angles set located between 1 and 90 degrees and phi angles set located between 0 and 179 degrees
+  
+  Input params:
+  
+    N_theta - number of theta angles
+    N_phi - number of phi angles
+  
+  Output params:
+  
+    astra_angles - set of angles in its the ASTRA Toolbox representation 
+    deg_angles - set of angles in its degrees representation
+
 ### - getVectorRepresentationOfAngle
-  Calculation of angle vector representation which is required to ASTRA
+  Calculation of angle vector representation which is required to the ASTRA Toolbox
   
   Input params:
   
@@ -65,7 +93,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     sinograms - 3D array NxN_anglesxN of calculated sinograms
 ### - getRTmatrix
   
-  3D Radon transform linear operator matrix calculation
+  3D Radon transform linear operator sparse matrix calculation
   
   Input params:
   
@@ -79,7 +107,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Output params:
   
-  radon_matrix - 2D N_angles*N x N^3 array. 
+    radon_matrix - 2D N_angles*M x N^3 sparse matrix 
   
 ### - getAstraReconstruction
   
