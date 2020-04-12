@@ -38,6 +38,10 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     sigma - standard deviation value for covariance matrix    
     sigma_priors - standard deviation value for gaussian priors    
     sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    
+  Output params
+    
+    X - N^3 array with reconstructed data
   
 ## Matlab functions
 ### - getBallData
