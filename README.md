@@ -1,37 +1,68 @@
 # 3d_reconstruction
 
-Some functions for the reconstruction of 3D functions using probabilisic approach
-## Dependencies
-[The ASTRA Toolbox](https://www.astra-toolbox.com/)
+Some functions for the reconstruction of 3D functions using probabilisic approach. Data preparation, Radon transform matrix calculation, projections calculations are implemented using Matlab. MAP estimation is implemented using Python.
 
-## Functions
+## Matlab dependencies
+- [The ASTRA Toolbox](https://www.astra-toolbox.com/)
+## Python dependencies
+- Numpy
+- Scipy (minimize, io, sparse)
+
+## Python functions
+### - setRTmatrix
+  Upload Radon transform matrix which was precalculated using Matlab from .mat files and save it in memory. One need to call this function before MAP estimation
+  
+  Input params:
+  
+    filename - name of .mat file. For instance, "RM15.mat"
+
+### - setProjections
+  Upload projection values which was precalculated using Matlab from binary file. One need to call this function before MAP estimation
+
+  Input params:
+  
+    filename - name of binary file with projection values    
+    M - number of planes per one direction    
+    K - number of directions    
+    p = 0 - should projection values and shape of data be printed or not    
+    sigma_noise = 1 - standard deviation of noise
+    
+### - getMAP_gaussian
+  Calculates MAP estimation using Gaussian priors
+  
+  Input params:
+    
+    N_elem - number of elements of reconstructed data per each axe    
+    M - number of planes per one direction    
+    K - number of directions    
+    sigma - standard deviation value for covariance matrix    
+    sigma_priors - standard deviation value for gaussian priors    
+    sigma_bound - standard deviation value for boundary voxels for gaussian priors
+  
+## Matlab functions
 ### - getBallData
   3D-array with zeros and ones generation. Ones are located in each point which satisfies (x - x_c)^2 + (y - y_c)^2 + (z - z_c)^2 <= R^2
   
   Input params:
   
-    N - number of elements in each dimention
-    
+    N - number of elements in each dimension    
     R - radius of ball
   
   Output params:
   
-    data - 3D array NxNxN with generated values
-    
+    data - 3D array NxNxN with generated values    
     dt - discretization step
     
 ### - getComplexBallData
   3D-array with the ball which has ellipsoid, parallelepiped and two balls inside. 
   Input params:
   
-    N - number of elements in each dimention
-    
+    N - number of elements in each dimension    
     R - radius of ball
   
   Output params:
   
-    data - 3D array NxNxN with generated values
-    
+    data - 3D array NxNxN with generated values    
     dt - discretization step
     
 ### - getAnalyticalIntegrals
@@ -39,10 +70,8 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
   
-    N - number of planes per the direction
-    
-    dt - discretisation step
-    
+    N - number of planes per the direction    
+    dt - discretisation step    
     R - radius of ball
   
   Output params:
@@ -78,14 +107,10 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
   
-    data - 3D array NxNxN of data with (x,y,z) order
-    
-    N - number of elements in each dimention
-    
-    M - number of projectons per direction
-    
-    angles - 2D array N_anglesx12 of normal vector angles
-    
+    data - 3D array NxNxN of data with (x,y,z) order    
+    N - number of elements in each dimention    
+    M - number of projectons per direction    
+    angles - 2D array N_anglesx12 of normal vector angles    
     N_angles - number of angles
   
   Output params:
@@ -97,12 +122,9 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
   
-    N - number of elements in each dimension
-    
-    M - number of projections per each direction
-    
-    angles - 2D array N_anglesx12 of normal vector angles
-    
+    N - number of elements in each dimension    
+    M - number of projections per each direction    
+    angles - 2D array N_anglesx12 of normal vector angles    
     N_angles - number of angles
   
   Output params:
@@ -115,10 +137,8 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
     
-    N - number of elements in each dimension of the original data
-    
-    sino_id - ID of sinogram in ASTRA memory 
-    
+    N - number of elements in each dimension of the original data    
+    sino_id - ID of sinogram in ASTRA memory     
     N_iter - number of reconstruction algorithm iterations
   
   Output params:
@@ -133,20 +153,13 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
     
-    matrix - matrix of linear operator
-    
-    x - generated element of chain
-    
-    y - calculated integrals (initial data) 
-    
-    sigma_lh - sigma of likelihood distribution
-    
-    sigma_noise - sigma of noise distribution
-    
-    sigma_priors - sigma of priors distribution
-    
-    N - numer of elements in each direction
-    
+    matrix - matrix of linear operator    
+    x - generated element of chain    
+    y - calculated integrals (initial data)     
+    sigma_lh - sigma of likelihood distribution    
+    sigma_noise - sigma of noise distribution    
+    sigma_priors - sigma of priors distribution    
+    N - numer of elements in each direction    
     N_angles - number of angles
   
   Output params:
@@ -158,26 +171,18 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
     
-    N_steps - number of steps
-    
-    N - numer of elements in each direction
-    
-    N_angles - number of angles
-    
-    N_burnin_period - number of burn-in elements
-    
-    prop_sigma - sigma of proposal distribution
-    
-    radon_matrix - matrix of Radon transform
-    
-    y - calculated integrals (initial data)
-    
+    N_steps - number of steps    
+    N - numer of elements in each direction    
+    N_angles - number of angles    
+    N_burnin_period - number of burn-in elements    
+    prop_sigma - sigma of proposal distribution    
+    radon_matrix - matrix of Radon transform    
+    y - calculated integrals (initial data)    
     init_value - initial element of chain
 
 Output params:
     
-    chain - Markov chain: 2D array (N_steps-N_burnin_period)xN^3
-    
+    chain - Markov chain: 2D array (N_steps-N_burnin_period)xN^3    
     ratio - rate of accepted chain elements 
     
 ### - printToFile
@@ -185,14 +190,10 @@ Output params:
   
   Input params:
     
-    filename - name of file with data
-    
-    data - data array (1D, 2D or 3D)
-    
-    Nx - number of elements with respect to Ox
-    
-    Ny - number of elements with respect to Oy
-    
+    filename - name of file with data    
+    data - data array (1D, 2D or 3D)    
+    Nx - number of elements with respect to Ox    
+    Ny - number of elements with respect to Oy    
     Nz - number of elements with respect to Oz
 
 Output params:
