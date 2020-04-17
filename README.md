@@ -7,17 +7,18 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
 ## Python dependencies
 - Numpy
 - Scipy (minimize, io, sparse)
+- Numba
 
 ## Python functions
-### - setRTmatrix
-  Upload Radon transform matrix which was precalculated using Matlab from .mat files and save it in memory. One need to call this function before MAP estimation
+### - set_rt_matrix
+  Uploads Radon transform matrix which was precalculated using Matlab from .mat files and saves it in memory. One need to call this function before MAP estimation
   
   Input params:
   
     filename - name of .mat file. For instance, "RM15.mat"
 
-### - setProjections
-  Upload projection values which was precalculated using Matlab from binary file. One need to call this function before MAP estimation
+### - set_projections
+  Uploads projection values which was precalculated using Matlab from binary file. One need to call this function before MAP estimation
 
   Input params:
   
@@ -27,7 +28,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     p = 0 - should projection values and shape of data be printed or not    
     sigma_noise = 1 - standard deviation of noise
     
-### - getMAP_gaussian
+### - get_MAP_gaussian
   Calculates MAP estimation using Gaussian priors
   
   Input params:
@@ -41,8 +42,23 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     
   Output params
     
-    X - N^3 array with reconstructed data
+    X - one dimentional array (length = N^3) with reconstructed data
+### get_MAP_cauchy
+  Calculates MAP estimation using Cauchy priors
   
+  Input params:
+    
+    N_elem - N
+    M - number of projections per one direction
+    K - number of directions 
+    sigma - standard deviation value for likelihood
+    h - discretization step
+    lmbd - lambda value for Cauchy priors
+    
+  Output params
+    
+    X - one dimentional array (length = N^3) with reconstructed data
+    
 ## Matlab functions
 ### - getBallData
   3D-array with zeros and ones generation. Ones are located in each point which satisfies (x - x_c)^2 + (y - y_c)^2 + (z - z_c)^2 <= R^2
@@ -149,46 +165,6 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     
     data - reconstructed data
     
-### - L
-  
-  Gaussian log-posterior function. 
-  
-  Here likelihood function is Gaussian and priors are also Gaussian
-  
-  Input params:
-    
-    matrix - matrix of linear operator    
-    x - generated element of chain    
-    y - calculated integrals (initial data)     
-    sigma_lh - sigma of likelihood distribution    
-    sigma_noise - sigma of noise distribution    
-    sigma_priors - sigma of priors distribution    
-    N - numer of elements in each direction    
-    N_angles - number of angles
-  
-  Output params:
-    
-    res - log-posterior value 
-    
-### - MCMC_MH
-  Metropolis-Hastings MCMC algorithm realization
-  
-  Input params:
-    
-    N_steps - number of steps    
-    N - numer of elements in each direction    
-    N_angles - number of angles    
-    N_burnin_period - number of burn-in elements    
-    prop_sigma - sigma of proposal distribution    
-    radon_matrix - matrix of Radon transform    
-    y - calculated integrals (initial data)    
-    init_value - initial element of chain
-
-Output params:
-    
-    chain - Markov chain: 2D array (N_steps-N_burnin_period)xN^3    
-    ratio - rate of accepted chain elements 
-    
 ### - printToFile
   Data to file in (x,y,z)-order printing
   
@@ -203,3 +179,23 @@ Output params:
 Output params:
     
     flag - 1 - data is successfully printed, 0 - otherwise
+
+
+## Examples
+### How to prepare data using Matlab?
+1. Initialize main values:
+- N = number of elements per one axe (grid size)
+- K = number of direction
+- M = number of projections per one direction
+2. Initialize directions using function getAngles(N_theta, N_phi), where N_theta and N_phi are numbers of theta and phi angles respectively
+3. Generate data using getBallData or getComplexBallData functions
+4a. Obtain projections with function getSinograms
+4b. Add some noise to calculated projections if neccesary
+5. Save projections to the file using printToFile
+6. Obtain Radon transform matrix using function getRTmatrix (computational time depends on grid size, may requires a lot of time). It is important to note that this matrix must be saved using "save" Matlab' command. This matrix will be saved as .mat file
+
+### How to reconstruct data using Python?
+1. Import module "reconstruction"
+2. Call function set_rt_matrix and set the matrix previously saved to .mat file
+3. Call function set_projections and set calculated projections saved to binary file
+4. Call get_MAP_gaussian (log-posterior with Gaussian priors) or get_MAP_cauchy (log-posterior with Cauchy priors) to calculate desired reconstruction
