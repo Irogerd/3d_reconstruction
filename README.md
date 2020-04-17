@@ -1,6 +1,6 @@
 # 3d_reconstruction
 
-Some functions for the reconstruction of 3D functions using probabilisic approach. Data preparation, Radon transform matrix calculation, projections calculations are implemented using Matlab. MAP estimation is implemented using Python.
+Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane integration (formally, Radon transform application) vaules using probabilisic approach. Data preparation, Radon transform matrix calculation, projections calculations (forward problem) are implemented using MATLAB. MAP estimation (inverse problem) is implemented using Python.
 
 ## Matlab dependencies
 - [The ASTRA Toolbox](https://www.astra-toolbox.com/)
@@ -15,7 +15,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   
   Input params:
   
-    filename - name of .mat file. For instance, "RM15.mat"
+    filename - name of .mat file with Radon transform matrix. For instance, "RM15.mat"
 
 ### - set_projections
   Uploads projection values which was precalculated using Matlab from binary file. One need to call this function before MAP estimation
@@ -42,7 +42,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     
   Output params
     
-    X - one dimentional array (length = N^3) with reconstructed data
+    X - one dimensional array (length = N^3) with reconstructed data
 ### get_MAP_cauchy
   Calculates MAP estimation using Cauchy priors
   
@@ -57,7 +57,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     
   Output params
     
-    X - one dimentional array (length = N^3) with reconstructed data
+    X - one dimensional array (length = N^3) with reconstructed data
     
 ## Matlab functions
 ### - getBallData
@@ -99,7 +99,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     res - array of integral values with size N
     
 ### - getAngles
-  Calculates set of angles which define directions. This set is Cartesian product of number of theta angles set located between 1 and 90 degrees and phi angles set located between 0 and 179 degrees
+  Calculates set of angles which define directions. This set is Cartesian product of number of theta angles set located between 1 and 179 degrees and phi angles set located between 0 and 179 degrees
   
   Input params:
   
@@ -112,7 +112,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
     deg_angles - set of angles in its degrees representation
 
 ### - getVectorRepresentationOfAngle
-  Calculation of angle vector representation which is required to the ASTRA Toolbox
+  Calculation of angle vector representation which is required to the ASTRA Toolbox (see its documentation)
   
   Input params:
   
@@ -128,7 +128,7 @@ Some functions for the reconstruction of 3D functions using probabilisic approac
   Input params:
   
     data - 3D array NxNxN of data with (x,y,z) order    
-    N - number of elements in each dimention    
+    N - number of elements in each dimension    
     M - number of projectons per direction    
     angles - 2D array N_anglesx12 of normal vector angles    
     N_angles - number of angles
