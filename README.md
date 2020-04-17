@@ -189,8 +189,7 @@ Output params:
 - M = number of projections per one direction
 2. Initialize directions using function getAngles(N_theta, N_phi), where N_theta and N_phi are numbers of theta and phi angles respectively
 3. Generate data using getBallData or getComplexBallData functions
-4a. Obtain projections with function getSinograms
-4b. Add some noise to calculated projections if neccesary
+4. Obtain projections with function getSinograms (and add some noise to calculated projections if necessary)
 5. Save projections to the file using printToFile
 6. Obtain Radon transform matrix using function getRTmatrix (computational time depends on grid size, may requires a lot of time). It is important to note that this matrix must be saved using "save" Matlab' command. This matrix will be saved as .mat file
 
