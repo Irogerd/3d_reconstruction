@@ -235,13 +235,19 @@ def add_gaussian_gradient_priors_log(cur_res,x):
             for i in range(N):
                 # boundary point or not
                 if (i > 0 and i < N-1 and j > 0 and j < N-1 and k > 0 and k < N-1): # inside of domain
-                    t = 2/(x[i+N*j+N**2*k]+c) * ( (np.log(x[i+N*j+N**2*k]+c) - np.log(x[i-1+N*j+N**2*k]+c)) + (np.log(x[i+N*j+N**2*k]+c) - np.log(x[i+N*(j-1)+N**2*k]+c)) + (np.log(x[i+N*j+N**2*k]+c) - np.log(x[i+N*j+N**2*(k-1)]+c)) )
+                    #t = 2/(x[i+N*j+N**2*k]+c) * ( (np.log(x[i+N*j+N**2*k]+c) - np.log(x[i-1+N*j+N**2*k]+c)) + (np.log(x[i+N*j+N**2*k]+c) - np.log(x[i+N*(j-1)+N**2*k]+c)) + (np.log(x[i+N*j+N**2*k]+c) - np.log(x[i+N*j+N**2*(k-1)]+c)) )
+                    t = 2 * (np.log(x[i+N*j+N**2*k] + c) - np.log(x[(i-1)+N*j+N**2*k] + c))/(x[i+N*j+N**2*k] + c)
+                    t += 2 * (np.log(x[i+N*j+N**2*k] + c) - np.log(x[i+N*(j-1)+N**2*k] + c))/(x[i+N*j+N**2*k] + c)
+                    t += 2 * (np.log(x[i+N*j+N**2*k] + c) - np.log(x[i+N*j+N**2*(k-1)] + c))/(x[i+N*j+N**2*k] + c)
                     if (i+1 < N-1):
-                        t -= 2/(x[i + N*j + N**2*k]+c) * ( np.log(x[i+1 + N*j + N**2*k]+c) - np.log(x[i + N*j + N**2*k]+c) ) 
+                        #t -= 2/(x[i + N*j + N**2*k]+c) * ( np.log(x[i+1 + N*j + N**2*k]+c) - np.log(x[i + N*j + N**2*k]+c) ) 
+                        t -= 2 * (np.log(x[(i+1)+N*j+N**2*k] + c) - np.log(x[i+N*j+N**2*k] + c)) / (x[i+N*j+N**2*k] + c)
                     if (j+1 < N-1):
-                        t -= 2/(x[i + N*j + N**2*k]+c) * ( np.log(x[i + N*(j+1) + N**2*k]+c) - np.log(x[i + N*j + N**2*k]+c) ) 
+                        #t -= 2/(x[i + N*j + N**2*k]+c) * ( np.log(x[i + N*(j+1) + N**2*k]+c) - np.log(x[i + N*j + N**2*k]+c) ) 
+                        t -= 2 * (np.log(x[i+N*(j+1)+N**2*k] + c) - np.log(x[i+N*j+N**2*k] + c)) / (x[i+N*j+N**2*k] + c)
                     if (k+1 < N-1):
-                        t -= 2/(x[i + N*j + N**2*k]+c) * ( np.log(x[i + N*j + N**2*(k+1)]+c) - np.log(x[i + N*j + N**2*k]+c) ) 
+                        #t -= 2/(x[i + N*j + N**2*k]+c) * ( np.log(x[i + N*j + N**2*(k+1)]+c) - np.log(x[i + N*j + N**2*k]+c) ) 
+                        t -= 2 * (np.log(x[i+N*j+N**2*(k+1)] + c) - np.log(x[i+N*j+N**2*k] + c)) / (x[i+N*j+N**2*k] + c)
                     res[i+N*j+N**2*k] += c_prior * t
                     
                 else:
@@ -421,82 +427,6 @@ def get_MAP_cauchy(N_elem, M, K, sigma, h, lmbd):
 
     res = minimize(cauchy_logpost, init, method='L-BFGS-B', jac=cauchy_logpost_gradient, options={'disp': True})
     return res.x
-
-
-# Constructs the chain using Metropolis-Hastings MCMC algorithm with gaussian priors in maximum a posteriori function
-# Input params:
-#   M - number of projections per one direction
-#   K - number of directions 
-#   N_iter - length of chain
-#   N_burn - length of burn-in period
-#   init - initial value of chain
-#   sigma - standard deviation value for likelihood function
-#   sigma_priors - standard deviation value for priors inside the domain
-#   sigma_bound - standard deviation value for priors for boundary voxels
-#   prop_sigma - standard deviation value of proposal distribution
-# Output params:
-#   chain - generated chain
-#   ratio - (accepted steps)/(chain length) value
-def MCMC_MH_gaussian(N_elem, M, K,  N_iter, N_burn, init, sigma, sigma_priors, sigma_bound, prop_sigma):
-    if (rm == []):
-        print("One have to initialize Radon transform matrix. Use setRTmatrix function")
-        return 1
-    if (y == []):
-        print("One have to initialize projection values. Use setProjections function")
-        return 2
-
-    global N 
-    N = N_elem
-
-    global cov_matrix
-    cov_matrix = sigma * np.eye(M*K)
-
-    global inv_cov_matrix 
-    inv_cov_matrix = np.linalg.inv(cov_matrix)
-
-    global c_prior 
-    c_prior = 1/(sigma_priors**2)
-
-    global c_bound 
-    c_bound = 1/(sigma_bound**2)
-
-
-    #chain = np.zeros([N_iter, N**3])    
-    chain_cm = np.zeros(N**3)
-    first_element = np.zeros(N_iter - N_burn)
-
-    old_value = init
-    old_est = gaussian_logpost(init)
-    ratio = 0
-
-    meanval = np.zeros(N**3)
-
-    for i in range(1, N_iter):
-        #new_value = old_value + np.random.normal(0, prop_sigma, N**3)
-        new_value = old_value + np.random.multivariate_normal(meanval, sparseid(N**3).toarray())
-        new_est = gaussian_logpost(new_value)
-
-        s = np.random.uniform(0,1,1)
-        if(s < np.exp(old_est - new_est)):
-            #chain[i,:] = new_value
-            if(i >= N_burn):
-                chain_cm += new_value
-                first_element[i - N_burn] = new_value[0]
-
-            old_value = new_value
-            old_est = new_est
-            ratio += 1
-        else:
-            #chain[i,:] = old_value
-            if (i >= N_burn):
-                chain_cm += old_value
-                first_element[i - N_burn] = old_value[0]
-
-        if (i % 5000 == 0):
-            print(i, " chain elemens have been calculated")
-
-    chain_cm /= (N_iter - N_burn)
-    return chain_cm, first_element, ratio/N_iter
 
 
 def clearAll():
