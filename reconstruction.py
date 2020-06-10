@@ -189,7 +189,7 @@ def get_MAP_gaussian_1(N_elem, M, K, sigma, sigma_priors, sigma_bound):
     global c_bound 
     c_bound = 1/(sigma_bound**2)
     
-    res = minimize(gaussian_logpost_1, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1, options={'disp': True})
+    res = minimize(gaussian_logpost_1, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -214,7 +214,8 @@ def add_gaussian_priors_1_log(cur_res, x):
                     t += (np.log(x[i+N*j+N**2*k] + c) - np.log(x[i+N*j+N**2*(k-1)] + c))**2
                     res += c_prior_1 * t
                 else: #boundary point
-                    t = np.log(x[i + N*j + N**2*k]+c)**2
+                    #t = np.log(x[i + N*j + N**2*k]+c)**2
+                    t = x[i + N*j + N**2*k]**2
                     res += c_bound * t
 
     return res
@@ -264,8 +265,8 @@ def add_gaussian_gradient_priors_1_log(cur_res,x):
                     res[i+N*j+N**2*k] += c_prior_1 * t
                     
                 else:
-                    #res[i + N*j + N**2*k] += c_bound* 2/(x[i + N*j + N**2*k]+c) * np.log(x[i + N*j + N**2*k]+c)
-                    t = 2 * c_bound * np.log(x[i+N*j+N**2*k] + c) / (x[i+N*j+N**2*k] + c)
+                    #t = c_bound * 2 * np.log(x[i+N*j+N**2*k] + c) / (x[i+N*j+N**2*k] + c)
+                    t = c_bound * 2 * x[i+N*j+N**2*k]
 
                     if (i == 0 and j > 0 and j < N-1 and k > 0 and k < N-1): #back plane without edges
                         t -= c_prior_1 * 2*( np.log(x[(i+1) + N*j + N**2*k] + c) - np.log(x[i + N*j + N**2*k] + c) ) / (x[i+N*j+N**2*k] + c)
@@ -290,7 +291,7 @@ def gaussian_logpost_gradient_1_log(x):
     res = -rm_transp.dot(syAX) 
     
     res = add_gaussian_gradient_priors_1_log(res,x)
-    return res 
+    return res
 
 # Maximum a posteriori with Gaussian log-transformed priors calculation
 # Input params:
@@ -324,9 +325,13 @@ def get_MAP_gaussian_1_log(N_elem, M, K, c_log, sigma, sigma_priors, sigma_bound
     global c_bound 
     c_bound = 1/(sigma_bound**2)
     global c
-    c = c_log;
+    c = c_log
+
+    bound_conds = []
+    for i in range(N**3):
+        bound_conds.append((0, None))
     
-    res = minimize(gaussian_logpost_1_log, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_log, options={'disp': True})
+    res = minimize(gaussian_logpost_1_log, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_log, bounds=bound_conds, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -482,7 +487,7 @@ def get_MAP_gaussian_2(N_elem, M, K, sigma, sigma_priors, sigma_bound):
     global c_bound 
     c_bound = 1/(sigma_bound**2)
     
-    res = minimize(gaussian_logpost_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_2, options={'disp': True})
+    res = minimize(gaussian_logpost_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_2, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -509,7 +514,8 @@ def add_gaussian_priors_2_log(cur_res, x):
                     t += ( np.log(x[i + N*j + N**2*(k+1)]+c) - 2*np.log(x[i + N*j + N**2*k]+c) + np.log(x[i + N*j + N**2*(k-1)]+c) )**2
                     res += c_prior_2 * t
                 else: #boundary point
-                    t = np.log(x[i + N*j + N**2*k]+c)**2
+                    #t = np.log(x[i + N*j + N**2*k]+c)**2
+                    t = x[i+N*j+N**2*k]**2
                     res += c_bound * t
 
     return res
@@ -569,8 +575,8 @@ def add_gaussian_gradient_priors_2_log(cur_res,x):
                     res[i+N*j+N**2*k] += c_prior_2 * t
                     
                 else:
-                    #res[i + N*j + N**2*k] += c_bound*2/(x[i + N*j + N**2*k] + c)*np.log(x[i + N*j + N**2*k])
-                    t = 2 * c_bound * np.log(x[i + N*j + N**2*k]+c) / (x[i + N*j + N**2*k]+c)
+                    #t = 2 * c_bound * np.log(x[i + N*j + N**2*k]+c) / (x[i + N*j + N**2*k]+c)
+                    t = 2 * c_bound * x[i+N*j+N**2*k]
 
                     if (i == 0 and j > 0 and j < N-1 and k > 0 and k < N-1): # back plane without edges
                         t += c_prior_2 * 2/(x[i + N*j + N**2*k]+c)*(np.log(x[(i+2) + N*j + N**2*k]+c) - 2 * np.log(x[(i+1) + N*j + N**2*k]+c) + np.log(x[i + N*j + N**2*k]+c))
@@ -640,8 +646,12 @@ def get_MAP_gaussian_2_log(N_elem, M, K, c_log, sigma, sigma_priors, sigma_bound
     c_bound = 1/(sigma_bound**2)
     global c
     c = c_log
+
+    bound_conds = []
+    for i in range(N**3):
+        bound_conds.append((0, None))
     
-    res = minimize(gaussian_logpost_2_log, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_2_log, options={'disp': True})
+    res = minimize(gaussian_logpost_2_log, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_2_log, bounds=bound_conds, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -825,7 +835,7 @@ def get_MAP_gaussian_1_2(N_elem, M, K, sigma, sigma_priors_1, sigma_priors_2, si
     global c_bound 
     c_bound = 1/(sigma_bound**2)
     
-    res = minimize(gaussian_logpost_1_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_2, options={'disp': True})
+    res = minimize(gaussian_logpost_1_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_2, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -848,19 +858,20 @@ def add_gaussian_priors_1_2_log(cur_res, x):
                 # boundary point or not
                 if (i > 0 and i < N-1 and j > 0 and j < N-1 and k > 0 and k < N-1): # inside of domain
                     #first order:
-                    t_1 = (np.log(x[i+N*j+N**2*k] + c) - np.log(x[i-1+N*j+N**2*k] + c))**2 
+                    t_1 =  (np.log(x[i+N*j+N**2*k] + c) - np.log(x[(i-1)+N*j+N**2*k] + c))**2 
                     t_1 += (np.log(x[i+N*j+N**2*k] + c) - np.log(x[i+N*(j-1)+N**2*k] + c))**2 
                     t_1 += (np.log(x[i+N*j+N**2*k] + c) - np.log(x[i+N*j+N**2*(k-1)] + c))**2
 
                     #second order:
-                    t_2 = (np.log(x[(i+1) + N*j + N**2*k]+c) - 2*np.log(x[i + N*j + N**2*k]+c) + np.log(x[(i-1) + N*j + N**2*k]+c))**2 
+                    t_2 =  (np.log(x[(i+1) + N*j + N**2*k]+c) - 2*np.log(x[i + N*j + N**2*k]+c) + np.log(x[(i-1) + N*j + N**2*k]+c))**2 
                     t_2 += (np.log(x[i + N*(j+1) + N**2*k]+c) - 2*np.log(x[i + N*j + N**2*k]+c) + np.log(x[i + N*(j-1) + N**2*k]+c))**2 
                     t_2 += (np.log(x[i + N*j + N**2*(k+1)]+c) - 2*np.log(x[i + N*j + N**2*k]+c) + np.log(x[i + N*j + N**2*(k-1)]+c))**2
                     res += c_prior_1 * t_1 + c_prior_2 * t_2
 
 
                 else: #boundary point
-                    t = np.log(x[i + N*j + N**2*k]+c)**2
+                    #t = np.log(x[i + N*j + N**2*k]+c)**2
+                    t = x[i + N*j + N**2*k]**2
                     res += c_bound * t
 
     return res
@@ -908,7 +919,6 @@ def add_gaussian_gradient_priors_1_2_log(cur_res,x):
                         t_1 -= 2 * (np.log(x[i+N*(j+1)+N**2*k] + c) - np.log(x[i+N*j+N**2*k] + c)) / (x[i+N*j+N**2*k] + c)
                     if (k+1 < N-1):
                         t_1 -= 2 * (np.log(x[i+N*j+N**2*(k+1)] + c) - np.log(x[i+N*j+N**2*k] + c)) / (x[i+N*j+N**2*k] + c)
-                    #res[i+N*j+N**2*k] += c_prior_1 * t
 
                     #second order
                     t_2 =  -4/(x[i+N*j+N**2*k]+c) * ( np.log(x[(i+1) + N*j + N**2*k]+c) - 2*np.log(x[i + N*j + N**2*k]+c) + np.log(x[(i-1) + N*j + N**2*k]+c) )
@@ -933,7 +943,8 @@ def add_gaussian_gradient_priors_1_2_log(cur_res,x):
                     
                 else:
                     # first order
-                    t = 2 * c_bound * np.log(x[i+N*j+N**2*k] + c) / (x[i+N*j+N**2*k] + c)
+                    #t = 2 * c_bound * np.log(x[i+N*j+N**2*k] + c) / (x[i+N*j+N**2*k] + c)
+                    t = 2 * c_bound * x[i + N*j + N**2*k]
 
                     if (i == 0 and j > 0 and j < N-1 and k > 0 and k < N-1): #back plane without edges
                         t -= c_prior_1 * 2*(np.log(x[(i+1) + N*j + N**2*k] + c) - np.log(x[i + N*j + N**2*k] +c )) / (x[i+N*j+N**2*k] + c)
@@ -1015,8 +1026,12 @@ def get_MAP_gaussian_1_2_log(N_elem, M, K, c_log, sigma, sigma_priors_1, sigma_p
     c_bound = 1/(sigma_bound**2)
     global c
     c = c_log
+
+    bound_conds = []
+    for i in range(N**3):
+        bound_conds.append((0, None))
     
-    res = minimize(gaussian_logpost_1_2_log, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_2_log, options={'disp': True})
+    res = minimize(gaussian_logpost_1_2_log, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_2_log, bounds=bound_conds, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -1154,7 +1169,8 @@ def clearAll():
     del cov_matrix
     del inv_cov_matrix
     del N
-    del c_prior
+    del c_prior_1
+    del c_prior_2
     del c_bound
 
     

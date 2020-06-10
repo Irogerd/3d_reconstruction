@@ -1,5 +1,5 @@
 %
-%   3D Radon transform linear operator sparse matrix calculation
+%   3D Radon transform linear operator sparse matrix parallel calculation
 %   Input params:
 %       N               number of elements in each dimension
 %       M               number of projections per each direction
@@ -15,18 +15,17 @@
 function radon_matrix = getRTmatrix(N, M, angles, N_angles)
     m = N_angles*M;
     n = N^3;
-    radon_matrix = spalloc(m, n, round(m*n*0.05));
+    num_nz = 1/N;
+    radon_matrix = spalloc(m, n, round(m*n*num_nz));
     
-    columns = 1;
-    for z = 1:N
-        for y = 1:N
-            for x = 1:N
-                id_cube = zeros(N,N,N);
-                id_cube(x,y,z) = 1;
-                sino = getSinograms(id_cube, N, M, angles, N_angles);
-                radon_matrix(:,columns) = sparse(reshape(sino,[M*N_angles,1]));
-                columns = columns + 1;  
-            end
+    parfor z = 1:n   
+        id_cube = zeros(1,n);
+        id_cube(1,z) = 1;
+        id_cube = reshape(id_cube, [N,N,N]);
+        sino = reshape(getSinograms(id_cube, N, M, angles, N_angles), [M*N_angles,1]);
+		radon_matrix(:, z) = sparse(sino); 
+        if (mod(z, 1000000) == 0)
+            disp(z);
         end
     end
 end
