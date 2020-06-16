@@ -166,10 +166,11 @@ def gaussian_logpost_gradient_1(x):
 #   sigma - standard deviation value for the likelihood
 #   sigma_priors - standard deviation value for priors inside the domain
 #   sigma_bound - standard deviation value for priors for boundary voxels
+#   isPos = 0 - boolean value: unknown must be positive (isPos=1) or not 
 # Output params:
 #   x - optimization problem solution
 #   success - bool value indicates of successful convergence
-def get_MAP_gaussian_1(N_elem, M, K, sigma, sigma_priors, sigma_bound):
+def get_MAP_gaussian_1(N_elem, M, K, sigma, sigma_priors, sigma_bound, isPos = 0):
     if (rm == []):
         print("One have to initialize Radon transform matrix. Use setRTmatrix function")
         return 1
@@ -188,8 +189,16 @@ def get_MAP_gaussian_1(N_elem, M, K, sigma, sigma_priors, sigma_bound):
     c_prior_1 = 1/(sigma_priors**2)
     global c_bound 
     c_bound = 1/(sigma_bound**2)
+
+    if(isPos == 0):
+        bound_conds=None
+    else:
+        bound_conds = []
+        for i in range(N**3):
+            bound_conds.append((0, None))   
+        
+    res = minimize(gaussian_logpost_1, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1, bounds=bound_conds, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     
-    res = minimize(gaussian_logpost_1, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -464,10 +473,11 @@ def gaussian_logpost_gradient_2(x):
 #   sigma - standard deviation value for likelihood
 #   sigma_priors - standard deviation value for priors inside the domain
 #   sigma_bound - standard deviation value for priors for boundary voxels
+#   isPos = 0 - boolean value: unknown must be positive (isPos=1) or not 
 # Output params:
 #   x - optimization problem solution
 #   success - bool value indicates of successful convergence
-def get_MAP_gaussian_2(N_elem, M, K, sigma, sigma_priors, sigma_bound):
+def get_MAP_gaussian_2(N_elem, M, K, sigma, sigma_priors, sigma_bound, isPos=0):
     if (rm == []):
         print("One have to initialize Radon transform matrix. Use setRTmatrix function")
         return 1
@@ -486,8 +496,15 @@ def get_MAP_gaussian_2(N_elem, M, K, sigma, sigma_priors, sigma_bound):
     c_prior_2 = 1/(sigma_priors**2)
     global c_bound 
     c_bound = 1/(sigma_bound**2)
+
+    if(isPos == 0):
+        bounds_conds=None
+    else:
+        bound_conds = []
+        for i in range(N**3):
+            bound_conds.append((0, None))   
     
-    res = minimize(gaussian_logpost_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_2, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
+    res = minimize(gaussian_logpost_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_2, bounds=bound_conds, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -810,10 +827,11 @@ def gaussian_logpost_gradient_1_2(x):
 #   sigma_priors_1 - standard deviation value for the first order priors inside the domain
 #   sigma_priors_2 - standard deviation value  for the second order priors inside the domain
 #   sigma_bound - standard deviation value for priors for boundary voxels
+#   isPos = 0 - boolean value: unknown must be positive (isPos=1) or not 
 # Output params:
 #   x - optimization problem solution
 #   success - bool value indicates of successful convergence
-def get_MAP_gaussian_1_2(N_elem, M, K, sigma, sigma_priors_1, sigma_priors_2, sigma_bound):
+def get_MAP_gaussian_1_2(N_elem, M, K, sigma, sigma_priors_1, sigma_priors_2, sigma_bound, isPos=0):
     if (rm == []):
         print("One have to initialize Radon transform matrix. Use setRTmatrix function")
         return 1
@@ -835,7 +853,14 @@ def get_MAP_gaussian_1_2(N_elem, M, K, sigma, sigma_priors_1, sigma_priors_2, si
     global c_bound 
     c_bound = 1/(sigma_bound**2)
     
-    res = minimize(gaussian_logpost_1_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_2, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
+    if(isPos == 0):
+        bounds_conds = None
+    else:
+        bound_conds = []
+        for i in range(N**3):
+            bound_conds.append((0, None))   
+    
+    res = minimize(gaussian_logpost_1_2, init, method='L-BFGS-B', jac=gaussian_logpost_gradient_1_2, bounds=bound_conds, options={'disp': True, 'maxfun': 500000, 'maxiter': 500000})
     return res.x, res.success
 
 
@@ -1158,19 +1183,5 @@ def get_MAP_cauchy(N_elem, M, K, sigma, h, lmbd):
 
     res = minimize(cauchy_logpost, init, method='L-BFGS-B', jac=cauchy_logpost_gradient, options={'disp': True})
     return res.x
-
-
-def clearAll():
-    del index
-    del init
-    del rm
-    del rm_transp
-    del y
-    del cov_matrix
-    del inv_cov_matrix
-    del N
-    del c_prior_1
-    del c_prior_2
-    del c_bound
 
     
