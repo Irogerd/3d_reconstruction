@@ -1,13 +1,15 @@
 # 3d_reconstruction
 
-Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane integration (formally, Radon transform application) vaules using probabilisic approach. Data preparation, Radon transform matrix calculation, projections calculations (forward problem) are implemented using MATLAB. MAP estimation (inverse problem) is implemented using Python.
+There are some functions for the reconstruction of the 3D function p=f(x,y,z) from its plane integration (formally, three-dimensional Radon transform application) vaules using probabilisic approach. Data preparation, Radon transform matrix calculation, projections calculations (forward problem) are implemented using MATLAB. MAP estimations (inverse problem) with different priors are implemented using Python.
 
-## Matlab dependencies
+## Dependencies
+### Matlab
 - [The ASTRA Toolbox](https://www.astra-toolbox.com/)
-## Python dependencies
+### Python
 - Numpy
 - Scipy (minimize, io, sparse)
-- Numba
+- Numba (note that the code was tested using Numba 0.48, one need to be carefull using another versions)
+- h5py
 
 ## Python functions
 ### - set_rt_matrix
@@ -28,8 +30,8 @@ Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane 
     p = 0 - should projection values and shape of data be printed or not    
     sigma_noise = 1 - standard deviation of noise
     
-### - get_MAP_gaussian
-  Calculates MAP estimation using Gaussian priors
+### - get_MAP_gaussian_1
+  Calculates MAP estimation using first order differences Gaussian priors
   
   Input params:
     
@@ -39,10 +41,100 @@ Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane 
     sigma - standard deviation value for covariance matrix    
     sigma_priors - standard deviation value for gaussian priors    
     sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    isPos = 0 - boolean value which defines domain of the unknown. isPos = 1 => X_i >= 0 \forall i, X_i \in R otherwise. 
     
   Output params
     
     X - one dimensional array (length = N^3) with reconstructed data
+
+### - get_MAP_gaussian_1_log
+  Calculates MAP estimation using log-transformed first order differences Gaussian priors
+  
+  Input params:
+    
+    N_elem - number of elements of reconstructed data per each axe    
+    M - number of planes per one direction    
+    K - number of directions    
+    c_log - constant in logarithm to avoid zero value as its argument
+    sigma - standard deviation value for covariance matrix    
+    sigma_priors - standard deviation value for gaussian priors    
+    sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    
+  Output params
+    
+    X - one dimensional array (length = N^3) with reconstructed data
+    
+### - get_MAP_gaussian_2
+  Calculates MAP estimation using second order differences Gaussian priors
+  
+  Input params:
+    
+    N_elem - number of elements of reconstructed data per each axe    
+    M - number of planes per one direction    
+    K - number of directions    
+    sigma - standard deviation value for covariance matrix    
+    sigma_priors - standard deviation value for gaussian priors    
+    sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    isPos = 0 - boolean value which defines domain of the unknown. isPos = 1 => X_i >= 0 \forall i, X_i \in R otherwise. 
+    
+  Output params
+    
+    X - one dimensional array (length = N^3) with reconstructed data
+    
+### - get_MAP_gaussian_2_log
+  Calculates MAP estimation using log-transformed second order differences Gaussian priors
+  
+  Input params:
+    
+    N_elem - number of elements of reconstructed data per each axe    
+    M - number of planes per one direction    
+    K - number of directions    
+    c_log - constant in logarithm to avoid zero value as its argument
+    sigma - standard deviation value for covariance matrix    
+    sigma_priors - standard deviation value for gaussian priors    
+    sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    
+  Output params
+    
+    X - one dimensional array (length = N^3) with reconstructed data
+    
+### - get_MAP_gaussian_1_2
+  Calculates MAP estimation using the sum of the first and the second order differences Gaussian priors
+  
+  Input params:
+    
+    N_elem - number of elements of reconstructed data per each axe    
+    M - number of planes per one direction    
+    K - number of directions    
+    sigma - standard deviation value for covariance matrix    
+    sigma_priors_1 - standard deviation value for the first order priors inside the domain
+    sigma_priors_2 - standard deviation value  for the second order priors inside the domain    
+    sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    isPos = 0 - boolean value which defines domain of the unknown. isPos = 1 => X_i >= 0 \forall i, X_i \in R otherwise. 
+    
+  Output params
+    
+    X - one dimensional array (length = N^3) with reconstructed data
+    
+### - get_MAP_gaussian_1_2_log
+  Calculates MAP estimation using log-transformed second order differences Gaussian priors
+  
+  Input params:
+    
+    N_elem - number of elements of reconstructed data per each axe    
+    M - number of planes per one direction    
+    K - number of directions    
+    c_log - constant in logarithm to avoid zero value as its argument
+    sigma - standard deviation value for covariance matrix    
+    sigma_priors_1 - standard deviation value for the first order priors inside the domain
+    sigma_priors_2 - standard deviation value  for the second order priors inside the domain   
+    sigma_bound - standard deviation value for boundary voxels for gaussian priors
+    
+  Output params
+    
+    X - one dimensional array (length = N^3) with reconstructed data
+
+
 ### get_MAP_cauchy
   Calculates MAP estimation using Cauchy priors
   
@@ -58,7 +150,7 @@ Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane 
   Output params
     
     X - one dimensional array (length = N^3) with reconstructed data
-    
+
 ## Matlab functions
 ### - getBallData
   3D-array with zeros and ones generation. Ones are located in each point which satisfies (x - x_c)^2 + (y - y_c)^2 + (z - z_c)^2 <= R^2
@@ -66,7 +158,7 @@ Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane 
   Input params:
   
     N - number of elements in each dimension    
-    R - radius of ball
+    R - radius of the ball
   
   Output params:
   
@@ -78,7 +170,7 @@ Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane 
   Input params:
   
     N - number of elements in each dimension    
-    R - radius of ball
+    R - radius of the ball
   
   Output params:
   
@@ -150,20 +242,6 @@ Some functions for the reconstruction of 3D functions p=f(x,y,z) from its plane 
   Output params:
   
     radon_matrix - 2D N_angles*M x N^3 sparse matrix 
-  
-### - getAstraReconstruction
-  
-  Reconstruction of original data based on ASTRA sinogram
-  
-  Input params:
-    
-    N - number of elements in each dimension of the original data    
-    sino_id - ID of sinogram in ASTRA memory     
-    N_iter - number of reconstruction algorithm iterations
-  
-  Output params:
-    
-    data - reconstructed data
     
 ### - printToFile
   Data to file in (x,y,z)-order printing
@@ -182,19 +260,21 @@ Output params:
 
 
 ## Examples
-### How to prepare data using Matlab?
+## How to prepare data using Matlab?
 1. Initialize main values:
 - N = number of elements per one axe (grid size)
 - K = number of direction
 - M = number of projections per one direction
-2. Initialize directions using function getAngles(N_theta, N_phi), where N_theta and N_phi are numbers of theta and phi angles respectively
-3. Generate data using getBallData or getComplexBallData functions
+2. Initialize directions:
+- you cound initialize directions manually using function getVectorRepresentationOfAngles
+- or using function getAngles(N_theta, N_phi), where N_theta and N_phi are numbers of theta and phi angles respectively
+3. Generate data using getBallData or getComplexBallData functions for the test cases or initialize by any other 3D data
 4. Obtain projections with function getSinograms (and add some noise to calculated projections if necessary)
 5. Save projections to the file using printToFile
-6. Obtain Radon transform matrix using function getRTmatrix (computational time depends on grid size, may requires a lot of time). It is important to note that this matrix must be saved using "save" Matlab' command. This matrix will be saved as .mat file
+6. Obtain Radon transform matrix using function getRTmatrix (computational time depends on grid size, may requires a lot of time). It is important to note that this matrix must be saved using "save" Matlab' command with version flag "-v7.3". This matrix will be saved as .mat file. The flag is required because the matrix would be too large.
 
 ### How to reconstruct data using Python?
 1. Import module "reconstruction"
 2. Call function set_rt_matrix and set the matrix previously saved to .mat file
-3. Call function set_projections and set calculated projections saved to binary file
-4. Call get_MAP_gaussian (log-posterior with Gaussian priors) or get_MAP_cauchy (log-posterior with Cauchy priors) to calculate desired reconstruction
+3. Call function set_projections and set calculated projections previously saved to binary file
+4. Call some of the reconstruction functions, for instance, get_MAP_gaussian_1(log-posterior with Cauchy priors) to calculate desired reconstruction
